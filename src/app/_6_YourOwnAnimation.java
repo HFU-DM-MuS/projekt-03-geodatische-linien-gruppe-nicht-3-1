@@ -174,7 +174,7 @@ class _6_YourOwnAnimationPanel extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2d;
 		g2d = (Graphics2D) g;
-
+		int radius = this.getWidth()/4;
 		double scaleFactor = 0.25;
 		double s1 = 1.0 / Math.sqrt(2.0);
 		double s2 =  1.0;
@@ -182,8 +182,8 @@ class _6_YourOwnAnimationPanel extends JPanel {
 		double alpha = Math.toRadians(135);
 
 
-		double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH/2 *scaleFactor},
-				{-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT/2 *scaleFactor}};
+		double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH/12.},
+				{-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT/12.}};
 
 
 		double E1h[] = {1.0, 0.0, 0.0, 1.0};
@@ -219,6 +219,10 @@ class _6_YourOwnAnimationPanel extends JPanel {
 		//draw E'1
 		g.setColor(Color.RED);
 		g.drawLine(originX , originY , originX  - (int)xAxisEndPoint[0], originY  + (int)xAxisEndPoint[1]);
+
+
+		g.setColor(Color.CYAN);
+		g.drawOval(originX-radius, originY-radius, radius*2, radius*2);
 
 /*
 e1 soll sozusagen x achse sein -> müssen also für e1 definieren, wie lang der ist; das selbe dann auch für e2 und e3
