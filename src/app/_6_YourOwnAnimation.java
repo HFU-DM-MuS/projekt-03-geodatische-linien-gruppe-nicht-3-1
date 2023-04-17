@@ -1,137 +1,261 @@
 package app;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import utils.ApplicationTime;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class _6_YourOwnAnimation extends Animation {
+import java.io.*;
 
-	@Override
-	protected ArrayList<JFrame> createFrames(ApplicationTime applicationTimeThread) {
-		// a list of all frames (windows) that will be shown
-		ArrayList<JFrame> frames = new ArrayList<>();
 
-		// Create main frame (window)
-		JFrame frame = new JFrame("Mathematik und Simulation");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JPanel panel = new _6_YourOwnAnimationPanel(applicationTimeThread);
-		frame.add(panel);
-		frame.pack(); // adjusts size of the JFrame to fit the size of it's components
-		frame.setVisible(true);
 
-		frames.add(frame);
-		return frames;
-	}
+	public class _6_YourOwnAnimation extends Animation {
 
-}
+		static JButton buttonContinue = new JButton();
+		static JButton buttonStop = new JButton();
+		static JButton buttonPause = new JButton();
 
-class _6_YourOwnAnimationPanel extends JPanel {
+		private static void createControlFrame(ApplicationTime thread) {
+			// Create a new frame
+			JFrame controlFrame = new JFrame("Mathematik und Simulation");
+			controlFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			controlFrame.setLayout(new GridLayout(1, 2, 10, 0)); // manages the layout of panels in the frame
 
-	// panel has a single time tracking thread associated with it
-	private final ApplicationTime t;
+			// Add a JPanel as the new drawing surface
+			JPanel panel = new JPanel();
+			panel.setLayout(new GridLayout(2, 4, 5, 0)); // manages the layout of elements in the panel (buttons, labels,
+			// other panels, etc.)
+			JPanel scrollPanel = new JPanel();
+			scrollPanel.setLayout(new GridLayout(2, 2, 5, 5));
+			controlFrame.add(panel);
+			controlFrame.add(scrollPanel);
+			controlFrame.setVisible(true);
 
-	private double time;
+			// set up first Panel
+			buttonContinue = new JButton();
+			buttonContinue.setBackground(Color.WHITE);
+			buttonContinue.addActionListener(new ControlButtons2(buttonContinue, controlFrame, thread));
+			buttonContinue.setText("Continue");
 
-	public _6_YourOwnAnimationPanel(ApplicationTime thread) {
-		this.t = thread;
-	}
+			buttonStop = new JButton();
+			buttonStop.setBackground(Color.WHITE);
+			buttonStop.addActionListener(new ControlButtons2(buttonStop, controlFrame, thread));
+			buttonStop.setText("Stop (forever)");
 
-	// set this panel's preferred size for auto-sizing the container JFrame
-	public Dimension getPreferredSize() {
-		return new Dimension(_0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
-	}
+			buttonPause = new JButton();
+			buttonPause.setBackground(Color.WHITE);
+			buttonPause.addActionListener(new ControlButtons2(buttonPause, controlFrame, thread));
+			buttonPause.setText("Pause");
 
-	int width = _0_Constants.WINDOW_WIDTH;
-	int height = _0_Constants.WINDOW_HEIGHT;
-	double startX = 20;
-	double startY = 20;
-	double vX = 160;
-	double vY = 20;
-	double currentX = startX;
-	double currentY = startY;
-	int diameter = 50;
+			panel.add(buttonContinue);
+			panel.add(buttonStop);
+			panel.add(buttonPause);
 
-	// drawing operations should be done in this method
-	@Override
-	protected void paintComponent(Graphics g) {
+			// set up second panel
+			JLabel scrollLabel = new JLabel("Adjust time scaling:");
+			JLabel timeScalingLabel = new JLabel("Current scaling :");
+			JLabel currentScaling = new JLabel("1");
 
-		super.paintComponent(g);
-		time = t.getTimeInSeconds();
+			JScrollBar scrollBar = new JScrollBar(Adjustable.HORIZONTAL, 1, 5, -50, 55);
+			scrollBar.addAdjustmentListener(e -> {
+				double newScaling = (double) scrollBar.getValue() / 5;
+				thread.changeTimeScaling(newScaling);
+				currentScaling.setText(Double.toString(newScaling));
+			});
 
-		g.setColor(Color.LIGHT_GRAY);
-		g.fillRect(0, 0, _0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
+			scrollPanel.add(scrollLabel);
+			scrollPanel.add(scrollBar);
 
-		currentX = startX + time * vX;
-		currentY = startY + time * vY;
+			scrollPanel.add(timeScalingLabel);
+			scrollPanel.add(currentScaling);
+			controlFrame.pack();
 
-		// TODO: do something to bounce the ball
-		// bounce might change x coordinate
+		}
 
-		g.setColor(Color.RED);
-		g.fillOval((int) currentX, (int) currentY, diameter, diameter);
 
-		/*
-		 * Exercises:
-		 *
-		 * 1) Use the same initial conditions ( startX, startY, vX, vY ) as above. Let
-		 * the circle/ball "bounce off the vertical walls", i.e. provide for correct
-		 * changes of velocity whenever the circle/ball "collides elastically with" the
-		 * right-hand or the left-hand frame borders.
-		 *
-		 * Hints: (i) As soon as the condition if( currentX >= width) yields "TRUE", do
-		 * the following - reverse vX: vX = -vX; - assign the value "width" to the
-		 * variable "startX"; - assign the value "time" to a new variable
-		 * "collisionTime", that you have to add to the code. (ii) Replace the code line
-		 * "currentX = startX + time * vX;" by "currentX = startX + (time -
-		 * collisionTime) * vX;"
-		 *
-		 * Improve the application by ensuring that the ball does not penetrate into the
-		 * right-hand wall.
-		 *
-		 * 2) Choose any initial conditions (startX, startY, vX, vY ). Let the
-		 * circle/ball "bounce off the walls", i.e. provide for correct changes of
-		 * velocity whenever the circle/ball "collides elastically with" any of the four
-		 * frame borders.
-		 *
-		 * (i) As an alternative to the techniques employed in Exercise 1), use now what
-		 * we may call the "deltaTime paradigm":
-		 *
-		 * double deltaTime = 0.0; double lastFrameTime = 0.0;
-		 *
-		 * deltaTime = time - lastFrameTime; lastFrameTime = time; currentX = currentX +
-		 * (vX * deltaTime); currentY = currentY + (vY * deltaTime);
-		 *
-		 * if (currentX >= _0_Constants.WINDOW_WIDTH - diameter) {
-		 * System.out.println("Object has hit the right-hand wall."); vX = -vX; currentX
-		 * = currentX - 1; // One pixel is subtracted from to the current x-coordinate
-		 * if the ball is at // the right-hand boundary. This prevents the ball from
-		 * "sticking to the border" after a collision
-		 *
-		 * (ii) Note the following ways of formatting numerical output:
-		 *
-		 * System.out.println("vX = " + (double) Math.round(100 * vX) / 100);
-		 * System.out.println("currentX = " + (double) Math.round(100 * currentX) /
-		 * 100); System.out.println("currentY = " + (double) Math.round(100 * currentY)
-		 * / 100 + '\n');
-		 *
-		 *
-		 * 3) Simulate the motion of the ball/circle under the influence of gravity
-		 * Place the circle a some height h above the floor (bottom frame border) with
-		 * initial velocity vY = 0. Let the circle/ball undergo accelerated motion
-		 * toward the bottom. Once the ball hits the floor, its velocity is reversed
-		 * (fully elastic collision), the ensuing upward motion is decelerated until the
-		 * circle/ball comes to rest a height h, etc. * 4) As in Exercise 3) except that
-		 * there shall now be a loss of kinetic energy each time the ball hits the
-		 * bottom.
-		 *
-		 *
-		 */
+		@Override
+		protected ArrayList<JFrame> createFrames(ApplicationTime applicationTimeThread) {
+			// a list of all frames (windows) that will be shown
+			ArrayList<JFrame> frames = new ArrayList<>();
+
+			// Create main frame (window)
+			JFrame frame = new JFrame("Mathematik und Simulation");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			JPanel panel = new _6_YourOwnAnimationPanel(applicationTimeThread);
+			frame.add(panel);
+			frame.pack(); // adjusts size of the JFrame to fit the size of it's components
+			frame.setVisible(true);
+
+			frames.add(frame);
+			createControlFrame(applicationTimeThread);
+			return frames;
+		}
 
 	}
-}
+
+	class ControlButtons2 implements ActionListener {
+		JButton button;
+		JFrame frame;
+		ApplicationTime applicationTimeThread;
+
+		public ControlButtons2(JButton button, JFrame frame, ApplicationTime applicationTimeThread) {
+			this.button = button;
+			this.frame = frame;
+			this.applicationTimeThread = applicationTimeThread;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+
+			if (button.equals(_6_YourOwnAnimation.buttonPause)) {
+				System.out.println("Pause pressed");
+			} else if (button.equals(_6_YourOwnAnimation.buttonStop)) {
+
+				System.out.println("Stop pressed, thread ended");
+			} else if (button.equals(_6_YourOwnAnimation.buttonContinue)) {
+
+				_6_YourOwnAnimationPanel.SetOffset();
+				System.out.println("Continue pressed");
+			}
+		}
+	}
+
+
+	class _6_YourOwnAnimationPanel extends JPanel {
+
+		// panel has a single time tracking thread associated with it
+		private final ApplicationTime t;
+
+		private double time;
+
+		public _6_YourOwnAnimationPanel(ApplicationTime thread) {
+			this.t = thread;
+		}
+
+		// set this panel's preferred size for auto-sizing the container JFrame
+		public Dimension getPreferredSize() {
+			return new Dimension(_0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
+		}
+
+
+		public static int offsetx;
+		public static int offsety;
+		double startX = 20;
+		double startY = 20;
+		double vX = 160;
+		double vY = 20;
+		double currentX = startX;
+		double currentY = startY;
+		int diameter = 50;
+		public int originX = 0;
+		public int originY = 0;
+
+		public static void SetOffset() {
+
+			offsetx += 10;
+			offsety += 10;
+
+		}
+
+		// drawing operations should be done in this method
+		@Override
+		protected void paintComponent(Graphics g) {
+
+			super.paintComponent(g);
+			Graphics2D g2d;
+			g2d = (Graphics2D) g;
+
+			double scaleFactor = 100.0;
+			double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
+			double s2 = scaleFactor * 1.0;
+			double s3 = scaleFactor * 1.0;
+			double alpha = Math.toRadians(135);
+
+
+
+			double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH / 2},
+					{-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT / 2}};
+
+
+			double E1h[] = {1.0, 0.0, 0.0, 1.0};
+
+
+			double E2h[] = {0.0, 1.0, 0.0, 1.0};
+
+			double E3h[] = {0.0, 0.0, 1.0, 1.0};
+
+			double Originh[] = {0.0, 0.0, 0.0, 1.0};
+			//method multiplication of matrix-vector
+			double xAxisEndPoint[]= multMatVec(M,E1h);
+
+			int width = this.getWidth();
+			int height = this.getHeight();
+			super.paintComponent(g);
+			time = t.getTimeInSeconds();
+
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, this.getWidth(), this.getHeight());
+
+			currentX = startX + time * vX;
+			currentY = startY + time * vY;
+
+			//g.setColor(Color.WHITE);
+			//g.drawLine(originX + width/2, originY , originX+width/2, originY + height );
+			//g.setColor(Color.WHITE);
+			//g.drawLine(originX, originY+height/2 , originX+width-1, originY + height/2 );
+
+
+		/*for (int i = 0; i < O0.length; i++){
+			g.setColor(Color.BLUE);
+			//g.drawLine(E11.length);
+
+		}*/
+			//g.drawLine(E11.length);
+
+
+
+
+
+/*
+e1 soll sozusagen x achse sein -> müssen also für e1 definieren, wie lang der ist; das selbe dann auch für e2 und e3
+-> später in der matrix benutzen wir dann nur e1 e2 und e3 zum definieren von der kugel.
+-> unsere erste linie (x) definieren wir also über start point e1 = width/2 und heigth/2 and end point + 200?
+the same with e2 and e3.
+and then we can use e1 *2 for width and e2 * 2 as height for our first circle?
+then a second circle with e3 *2 and e2 * 2
+
+ */
+
+			//set Line Width
+			g2d.setStroke(new BasicStroke(3.0f));
+			//draw E'2
+			g.setColor(Color.GREEN);
+			g.drawLine(originX + width / 2, originY + height / 2, originX + width / 2 + 100 - offsetx, originY + height / 2 + offsety);
+			//draw E'3
+			g.setColor(Color.BLUE);
+			g.drawLine(originX + width / 2, originY + height / 2, originX + width / 2, originY + height / 2 - 100 + offsety);
+			//draw E'1
+			g.setColor(Color.RED);
+			g.drawLine(originX + width / 2, originY + height / 2, originX + width / 2 - 50, originY + height / 2 + 50);
+		}
+
+		private double[] multMatVec(double[][] m, double[] e1h) {
+
+
+
+		}
+	}
+
+/*müssen es schaffen, dass wir die Matrix mit einer for loop printen können. wie?*/
