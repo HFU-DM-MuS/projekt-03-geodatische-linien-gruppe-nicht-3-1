@@ -42,7 +42,7 @@ public class SphericalGridDrawer extends JPanel {
                 if (prevMousePos != null) {
                     int dx = e.getX() - prevMousePos.x;
                     int dy = e.getY() - prevMousePos.y;
-                    rotateX += dy * 0.01;
+                    rotateX -= dy * 0.01;
                     rotateY += dx * 0.01;
                     prevMousePos = e.getPoint();
                     repaint();
@@ -102,11 +102,19 @@ public class SphericalGridDrawer extends JPanel {
 
         // the latitudinal lines
         for (int i = 0; i < numLatitudes; i++) {
-            double phi = (i + 1) * Math.PI / (numLatitudes + 1);
+            double phi = (i + 1) * Math.PI / (numLatitudes +1);
             for (int j = 0; j < numLongitudes; j++) {
                 double theta = j * 2 * Math.PI / numLongitudes;
-                double[][] p1 = {{radius * Math.sin(phi) * Math.cos(theta)}, {radius * Math.cos(phi)}, {radius * Math.sin(phi) * Math.sin(theta)}};
-                double[][] p2 = {{radius * Math.sin(phi) * Math.cos(theta + 2 * Math.PI / numLongitudes)}, {radius * Math.cos(phi)}, {radius * Math.sin(phi) * Math.sin(theta + 2 * Math.PI / numLongitudes)}};
+                double[][] p1 = {{radius * Math.sin(phi) * Math.cos(theta)},
+                                 {radius * Math.cos(phi)},
+                                 {radius * Math.sin(phi) * Math.sin(theta)}
+                };
+
+                double[][] p2 = {{radius * Math.sin(phi) * Math.cos(theta + 2 * Math.PI / numLongitudes)},
+                                 {radius * Math.cos(phi)},
+                                 {radius * Math.sin(phi) * Math.sin(theta + 2 * Math.PI / numLongitudes)}
+                };
+
                 double[][] q1 = matrixMultiply(transform, p1);
                 double[][] q2 = matrixMultiply(transform, p2);
                 drawLine(g2d, q1, q2);
