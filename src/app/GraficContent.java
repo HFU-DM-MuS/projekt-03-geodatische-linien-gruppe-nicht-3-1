@@ -185,14 +185,14 @@ class GraficContentPanel extends JPanel {
         Graphics2D g2d;
         g2d = (Graphics2D) g;
 
-        double scaleFactor = 200.0;
+        double scaleFactor =200.0;
         double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
         double s2 = scaleFactor * 1.0;
         double s3 = scaleFactor * 1.0;
 
 
-        double M[][] = {{-s1 * Math.sin(alpha), s2, 0, 1},
-                {-s1 * Math.cos(alpha), 0, -s3, 1}};
+        double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH/2},
+                {-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT/2}};
         double E1h[] = {1.0, 0.0, 0.0, 1.0};
         double E2h[] = {0.0, 1.0, 0.0, 1.0};
         double E3h[] = {0.0, 0.0, 1.0, 1.0};
@@ -218,13 +218,13 @@ class GraficContentPanel extends JPanel {
         g2d.setStroke(new BasicStroke(3.0f));
         //draw E'2
         g.setColor(Color.GREEN);
-        g.drawLine(originX, originY, originX + (int) yAxisEndPoint[0], originY + (int) yAxisEndPoint[1]);
+        g.drawLine(originX, originY, (int) yAxisEndPoint[0], (int) yAxisEndPoint[1]);
         //draw E'3
         g.setColor(Color.BLUE);
-        g.drawLine(originX, originY, originX + (int) zAxisEndPoint[0], originY + (int) zAxisEndPoint[1]);
+        g.drawLine(originX, originY, (int) zAxisEndPoint[0], (int) zAxisEndPoint[1]);
         //draw E'1
         g.setColor(Color.RED);
-        g.drawLine(originX, originY, originX + (int) xAxisEndPoint[0], originY + (int) xAxisEndPoint[1]);
+        g.drawLine(originX, originY, (int) xAxisEndPoint[0], (int) xAxisEndPoint[1]);
 
         // Draw the longitudinal lines
         g2d.setStroke(new BasicStroke(1.0f));
