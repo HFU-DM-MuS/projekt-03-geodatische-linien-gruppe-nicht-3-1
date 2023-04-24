@@ -65,14 +65,15 @@ public class GraficContent extends Animation {
         // set up second panel
         JLabel scrollLabel = new JLabel("Adjust time scaling:");
         JLabel timeScalingLabel = new JLabel("Current scaling :");
-        JLabel currentScaling = new JLabel("1");
 
-        JScrollBar scrollBar = new JScrollBar(Adjustable.HORIZONTAL, 1, 5, -50, 55);
-        scrollBar.addAdjustmentListener(e -> {
-            double newScaling = (double) scrollBar.getValue() / 5;
-            thread.changeTimeScaling(newScaling);
-            currentScaling.setText(Double.toString(newScaling));
+        JLabel currentScaling = new JLabel(String.format("%d", (int) GraficContentPanel.alpha));
+        JSlider scrollBar = new JSlider(0, 360, (int) GraficContentPanel.alpha);
+        scrollBar.addChangeListener(e -> {
+            GraficContentPanel.setAlpha(scrollBar.getValue());
+
+
         });
+
 
         scrollPanel.add(scrollLabel);
         scrollPanel.add(scrollBar);
@@ -126,14 +127,18 @@ class ControlButtons2 implements ActionListener {
             System.out.println("Stop pressed, thread ended");
         } else if (button.equals(GraficContent.buttonContinue)) {
 
-            GraficContentPanel.SetOffset();
-            System.out.println("Continue pressed");
+            GraficContentPanel.drawLine();
         }
     }
 }
 
 
 class GraficContentPanel extends JPanel {
+    public static void setAlpha(double a) {
+
+        alpha = Math.toRadians(a);
+
+    }
 
     // panel has a single time tracking thread associated with it
     private final ApplicationTime t;
@@ -144,14 +149,21 @@ class GraficContentPanel extends JPanel {
         this.t = thread;
     }
 
+    public static void drawLine() {
+
+
+    }
+
     // set this panel's preferred size for auto-sizing the container JFrame
     public Dimension getPreferredSize() {
         return new Dimension(_0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
     }
 
+    public static double Pos1[];
+    public static double Pos2[];
 
-    public static int offsetx;
-    public static int offsety;
+    public static double Pos1Final[];
+    public static double Pos2Final[];
     double radius = 1;
     double startX = 20;
     double startY = 20;
@@ -162,13 +174,7 @@ class GraficContentPanel extends JPanel {
     int diameter = 50;
     public int originX = 0;
     public int originY = 0;
-
-    public static void SetOffset() {
-
-        offsetx += 10;
-        offsety += 10;
-
-    }
+    public static double alpha = Math.toRadians(120);
 
     // drawing operations should be done in this method
     @Override
@@ -179,24 +185,14 @@ class GraficContentPanel extends JPanel {
         Graphics2D g2d;
         g2d = (Graphics2D) g;
 
-
-        double Tphi = 2 * Math.PI;
-
-
-
-
-
         double scaleFactor = 200.0;
         double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
         double s2 = scaleFactor * 1.0;
         double s3 = scaleFactor * 1.0;
-        double alpha = Math.toRadians(230);
 
 
         double M[][] = {{-s1 * Math.sin(alpha), s2, 0, 1},
                 {-s1 * Math.cos(alpha), 0, -s3, 1}};
-
-
         double E1h[] = {1.0, 0.0, 0.0, 1.0};
         double E2h[] = {0.0, 1.0, 0.0, 1.0};
         double E3h[] = {0.0, 0.0, 1.0, 1.0};
@@ -208,34 +204,49 @@ class GraficContentPanel extends JPanel {
         double yAxisEndPoint[] = multMatVec(M, E2h);
         double zAxisEndPoint[] = multMatVec(M, E3h);
 
+
         super.paintComponent(g);
         time = t.getTimeInSeconds();
+
 
         //Draw Background
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
 
 
+        //set Line Width
+        g2d.setStroke(new BasicStroke(3.0f));
+        //draw E'2
+        g.setColor(Color.GREEN);
+        g.drawLine(originX, originY, originX + (int) yAxisEndPoint[0], originY + (int) yAxisEndPoint[1]);
+        //draw E'3
+        g.setColor(Color.BLUE);
+        g.drawLine(originX, originY, originX + (int) zAxisEndPoint[0], originY + (int) zAxisEndPoint[1]);
+        //draw E'1
+        g.setColor(Color.RED);
+        g.drawLine(originX, originY, originX + (int) xAxisEndPoint[0], originY + (int) xAxisEndPoint[1]);
+
         // Draw the longitudinal lines
+        g2d.setStroke(new BasicStroke(1.0f));
         g.setColor(Color.GRAY);
-		for (double i = 0; i <= 1; i += 0.001) {
+        for (double i = 0; i <= 1; i += 0.001) {
             double theta = i * 2 * Math.PI;
-			for(double j = 0; j <= 1; j += 0.1){
+            for (double j = 0; j <= 1; j += 0.1) {
 
                 double phi = j * Math.PI;
                 double Kugel[] = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
                         radius * Math.sin(theta)
                 };
-                double Latitud[] = multMatVec(M, Kugel);
-                g2d.drawOval((int) Latitud[0] + originX, (int) Latitud[1] + originY, 1, 1);
+                double longitud[] = multMatVec(M, Kugel);
+                g2d.drawOval((int) longitud[0] + originX, (int) longitud[1] + originY, 1, 1);
             }
-		}
+        }
         // the latitudinal lines
 
         for (double i = 0; i <= 1; i += 0.001) {
-            double phi = i * 2*Math.PI;
-            for(double j = 0; j <= 1; j += 0.1){
+            double phi = i * 2 * Math.PI;
+            for (double j = 0; j <= 1; j += 0.1) {
                 double theta = j * 2 * Math.PI;
 
                 double Kugel[] = {radius * Math.cos(theta) * Math.cos(phi),
@@ -246,32 +257,36 @@ class GraficContentPanel extends JPanel {
                 g2d.drawOval((int) Latitud[0] + originX, (int) Latitud[1] + originY, 1, 1);
             }
         }
-/*
-        for (double i = 0; i <= 1; i += 0.001) {
-            for(double j = 0; j <= 1; j += 0.1){
-                double theta = i * 2 * Math.PI;
-                double phi = j * Math.PI;
-                double Aequator[] = {radius * Math.cos(phi * i), radius * Math.sin(phi * i), 0};
-                double Longitud[] = multMatVec(M, Aequator);
-                g2d.drawOval((int) Longitud[0] + originX, (int) Longitud[1] + originY, 1, 1);
-            }
-        }
-        */
-
-//set Line Width
-        g2d.setStroke(new BasicStroke(3.0f));
-        //draw E'2
-        g.setColor(Color.GREEN);
-        g.drawLine(originX, originY, originX + (int) yAxisEndPoint[0], originY);
-        //draw E'3
-        g.setColor(Color.BLUE);
-        g.drawLine(originX, originY, originX, originY + (int) zAxisEndPoint[1]);
-        //draw E'1
-        g.setColor(Color.RED);
-        g.drawLine(originX, originY, originX - (int) xAxisEndPoint[0], originY + (int) xAxisEndPoint[1]);
 
 
+        Pos1 = new double[]{35, 90};
+        Pos2 = new double[]{90, 35};
+        Pos1Final = multMatVec(M, Pos1);
+        Pos2Final = multMatVec(M, Pos2);
+        g.setColor(Color.yellow);
+
+        double Pos1Lat = Math.toRadians(38);
+        double Pos1Lon = Math.toRadians(56);
+        double Pos1M[] = {radius * Math.cos(Pos1Lon) * Math.cos(Pos1Lat),
+                radius * Math.cos(Pos1Lon) * Math.sin(Pos1Lat),
+                radius * Math.sin(Pos1Lon)
+        };
+        double Pos1Coord[] = multMatVec(M, Pos1M);
+        g2d.drawOval((int) Pos1Coord[0] + originX, (int) Pos1Coord[1] + originY, 2, 2);
+
+        g.setColor(Color.green);
+        double Pos2Lat = Math.toRadians(0);
+        double Pos2Lon = Math.toRadians(45);
+        double Pos2M[] = {radius * Math.cos(Pos2Lon) * Math.cos(Pos2Lat),
+                radius * Math.cos(Pos2Lon) * Math.sin(Pos2Lat),
+                radius * Math.sin(Pos2Lon)
+        };
+        double Pos2Coord[] = multMatVec(M, Pos2M);
+        g2d.drawOval((int) Pos2Coord[0] + originX, (int) Pos2Coord[1] + originY, 2, 2);
+
+        g2d.drawLine((int) Pos1Coord[0] + originX, (int) Pos1Coord[1] + originY, (int) Pos2Coord[0] + originX, (int) Pos2Coord[1] + originY);
     }
+
 
     private double[] multMatVec(double[][] m, double[] e1h) {
 

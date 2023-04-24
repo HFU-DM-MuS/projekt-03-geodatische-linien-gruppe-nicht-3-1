@@ -18,7 +18,7 @@ public abstract class Animation {
 		Timer timer = new Timer();
 		// After an initial delay of 100 milliseconds, the timer triggers an event every
 		// 1000 milliseconds which leads to a jumpy animation
-		timer.scheduleAtFixedRate(frameUpdater, 100, 1000);
+		timer.scheduleAtFixedRate(frameUpdater, 1, 1);
 
 	};
 
