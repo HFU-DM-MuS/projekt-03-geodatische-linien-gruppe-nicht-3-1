@@ -159,11 +159,7 @@ class GraficContentPanel extends JPanel {
         return new Dimension(_0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
     }
 
-    public static double Pos1[];
-    public static double Pos2[];
 
-    public static double Pos1Final[];
-    public static double Pos2Final[];
     double radius = 1;
     double startX = 20;
     double startY = 20;
@@ -185,14 +181,14 @@ class GraficContentPanel extends JPanel {
         Graphics2D g2d;
         g2d = (Graphics2D) g;
 
-        double scaleFactor =200.0;
+        double scaleFactor = 200.0;
         double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
         double s2 = scaleFactor * 1.0;
         double s3 = scaleFactor * 1.0;
 
 
-        double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH/2},
-                {-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT/2}};
+        double M[][] = {{-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH / 2},
+                {-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT / 2}};
         double E1h[] = {1.0, 0.0, 0.0, 1.0};
         double E2h[] = {0.0, 1.0, 0.0, 1.0};
         double E3h[] = {0.0, 0.0, 1.0, 1.0};
@@ -236,10 +232,11 @@ class GraficContentPanel extends JPanel {
                 double phi = j * Math.PI;
                 double Kugel[] = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
-                        radius * Math.sin(theta)
+                        radius * Math.sin(theta),
+                        1
                 };
                 double longitud[] = multMatVec(M, Kugel);
-                g2d.drawOval((int) longitud[0] + originX, (int) longitud[1] + originY, 1, 1);
+                g2d.drawOval((int) longitud[0] , (int) longitud[1] , 1, 1);
             }
         }
         // the latitudinal lines
@@ -251,36 +248,59 @@ class GraficContentPanel extends JPanel {
 
                 double Kugel[] = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
-                        radius * Math.sin(theta)
+                        radius * Math.sin(theta),
+                        1
                 };
                 double Latitud[] = multMatVec(M, Kugel);
-                g2d.drawOval((int) Latitud[0] + originX, (int) Latitud[1] + originY, 1, 1);
+                g2d.drawOval((int) Latitud[0] , (int) Latitud[1] , 1, 1);
             }
         }
 
 
 
+        g2d.setColor(Color.GREEN);
 
-        double Pos1Lat = Math.toRadians(0);
-        double Pos1Lon = Math.toRadians(0);
-        double Pos1M[] = {radius * Math.cos(Pos1Lon) * Math.cos(Pos1Lat),
-                radius * Math.cos(Pos1Lon) * Math.sin(Pos1Lat),
-                radius * Math.sin(Pos1Lon)
+        double Pos1Horizontal_angle = Math.toRadians(0);
+        double Pos1Vertical_angle = Math.toRadians(90);
+        double xPos1 =Math.cos(Pos1Vertical_angle) * Math.cos(Pos1Horizontal_angle);
+        double yPos1 =Math.cos(Pos1Vertical_angle) * Math.sin(Pos1Horizontal_angle);
+        double zPos1 = Math.sin(Pos1Vertical_angle);
+        double rPos1= Math.sqrt(Math.pow(xPos1,2)+Math.pow(yPos1,2) + Math.pow(zPos1,2));
+
+        double[] Pos1Cartesian = {
+                rPos1*xPos1,
+                rPos1*yPos1,
+                rPos1*zPos1,
+                1
         };
-        double Pos1Coord[] = multMatVec(M, Pos1M);
-        g2d.drawOval((int) Pos1Coord[0] + originX, (int) Pos1Coord[1] + originY, 2, 2);
 
-        g.setColor(Color.green);
-        double Pos2Lat = Math.toRadians(90);
-        double Pos2Lon = Math.toRadians(0);
-        double Pos2M[] = {radius * Math.cos(Pos2Lon) * Math.cos(Pos2Lat),
-                radius * Math.cos(Pos2Lon) * Math.sin(Pos2Lat),
-                radius * Math.sin(Pos2Lon)
+        double[] Pos1 = multMatVec(M,Pos1Cartesian);
+
+        g2d.drawOval((int) Pos1[0] , (int) Pos1[1] , 5, 5);
+
+        g2d.setColor(Color.cyan);
+
+        double Pos2Horizontal_angle = Math.toRadians(0);
+        double Pos2Vertical_angle = Math.toRadians(0);
+        double xPos2 =Math.cos(Pos2Vertical_angle) * Math.cos(Pos2Horizontal_angle);
+        double yPos2 =Math.cos(Pos2Vertical_angle) * Math.sin(Pos2Horizontal_angle);
+        double zPos2 = Math.sin(Pos2Vertical_angle);
+        double rPos2= Math.sqrt(Math.pow(xPos2,2)+Math.pow(yPos2,2) + Math.pow(zPos2,2));
+
+        double[] Pos2Cartesian = {
+               rPos2 * xPos2,
+               rPos2 * yPos2,
+               rPos2 * zPos2,
+                1
         };
-        double Pos2Coord[] = multMatVec(M, Pos2M);
-        g2d.drawOval((int) Pos2Coord[0] + originX, (int) Pos2Coord[1] + originY, 2, 2);
 
-        g2d.drawLine((int) Pos1Coord[0] + originX, (int) Pos1Coord[1] + originY, (int) Pos2Coord[0] + originX, (int) Pos2Coord[1] + originY);
+        double[] Pos2 = multMatVec(M,Pos2Cartesian);
+
+        g2d.drawOval((int) Pos2[0] , (int) Pos2[1] , 5, 5);
+
+
+        double[] VectorO_Pos1 = {10, 12};
+        double[] VectorO_Pos2 = {10, 12};
     }
 
 
@@ -296,6 +316,8 @@ class GraficContentPanel extends JPanel {
         return ResultMatrix;
 
     }
+
+
 }
 
 
