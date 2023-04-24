@@ -259,14 +259,10 @@ class GraficContentPanel extends JPanel {
         }
 
 
-        Pos1 = new double[]{35, 90};
-        Pos2 = new double[]{90, 35};
-        Pos1Final = multMatVec(M, Pos1);
-        Pos2Final = multMatVec(M, Pos2);
-        g.setColor(Color.yellow);
 
-        double Pos1Lat = Math.toRadians(38);
-        double Pos1Lon = Math.toRadians(56);
+
+        double Pos1Lat = Math.toRadians(0);
+        double Pos1Lon = Math.toRadians(0);
         double Pos1M[] = {radius * Math.cos(Pos1Lon) * Math.cos(Pos1Lat),
                 radius * Math.cos(Pos1Lon) * Math.sin(Pos1Lat),
                 radius * Math.sin(Pos1Lon)
@@ -275,8 +271,8 @@ class GraficContentPanel extends JPanel {
         g2d.drawOval((int) Pos1Coord[0] + originX, (int) Pos1Coord[1] + originY, 2, 2);
 
         g.setColor(Color.green);
-        double Pos2Lat = Math.toRadians(0);
-        double Pos2Lon = Math.toRadians(45);
+        double Pos2Lat = Math.toRadians(90);
+        double Pos2Lon = Math.toRadians(0);
         double Pos2M[] = {radius * Math.cos(Pos2Lon) * Math.cos(Pos2Lat),
                 radius * Math.cos(Pos2Lon) * Math.sin(Pos2Lat),
                 radius * Math.sin(Pos2Lon)
