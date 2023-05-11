@@ -187,20 +187,20 @@ class GraficContentPanel extends JPanel {
         double s3 = scaleFactor * 1.0;
 
 
-        double[][] M = {
+        double[][] projectionMatrix = {
                 {-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH / 2},
                 {-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT / 2}
                         };
         double[] e1H = {1.0, 0.0, 0.0, 1.0};
         double[] e2H = {0.0, 1.0, 0.0, 1.0};
         double[] e3H = {0.0, 0.0, 1.0, 1.0};
-        double[] originh = {0.0, 0.0, 0.0, 1.0};
+        double[] originH = {0.0, 0.0, 0.0, 1.0};
 
 
         //method multiplication of matrix-vector
-        double xAxisEndPoint[] = multMatVec(M, e1H);
-        double yAxisEndPoint[] = multMatVec(M, e2H);
-        double zAxisEndPoint[] = multMatVec(M, e3H);
+        double[] xAxisEndPoint = multMatVec(projectionMatrix, e1H);
+        double[] yAxisEndPoint = multMatVec(projectionMatrix, e2H);
+        double[] zAxisEndPoint = multMatVec(projectionMatrix, e3H);
 
 
         super.paintComponent(g);
@@ -237,7 +237,7 @@ class GraficContentPanel extends JPanel {
                         radius * Math.sin(theta),
                         1
                 };
-                double longitud[] = multMatVec(M, sphere);
+                double longitud[] = multMatVec(projectionMatrix, sphere);
                 g2d.drawOval((int) longitud[0] , (int) longitud[1] , 1, 1);
             }
         }
@@ -253,7 +253,7 @@ class GraficContentPanel extends JPanel {
                         radius * Math.sin(theta),
                         1
                 };
-                double latitud[] = multMatVec(M, sphere);
+                double latitud[] = multMatVec(projectionMatrix, sphere);
                 g2d.drawOval((int) latitud[0] , (int) latitud[1] , 1, 1);
             }
         }
@@ -276,17 +276,19 @@ class GraficContentPanel extends JPanel {
                 1
         };
 
-        double[] pos1 = multMatVec(M,pos1Cartesian);
+        double[] pos1 = multMatVec(projectionMatrix,pos1Cartesian);
 
         g2d.drawOval((int) pos1[0] , (int) pos1[1] , 5, 5);
 
         //Make a point on a desired position of the sphere
         g2d.setColor(Color.cyan);
-        double pos2Horizontal_angle = Math.toRadians(90);
-        double pos2Vertical_angle = Math.toRadians(0);
+        double pos2Horizontal_angle = Math.toRadians(45);
+        double pos2Vertical_angle = Math.toRadians(45);
+
         double xPos2 =Math.cos(pos2Vertical_angle) * Math.cos(pos2Horizontal_angle);
         double yPos2 =Math.cos(pos2Vertical_angle) * Math.sin(pos2Horizontal_angle);
         double zPos2 = Math.sin(pos2Vertical_angle);
+
         double rPos2= Math.sqrt(Math.pow(xPos2,2)+Math.pow(yPos2,2) + Math.pow(zPos2,2));
 
         double[] pos2Cartesian = {
@@ -296,7 +298,7 @@ class GraficContentPanel extends JPanel {
                 1
         };
 
-        double[] pos2 = multMatVec(M,pos2Cartesian);
+        double[] pos2 = multMatVec(projectionMatrix,pos2Cartesian);
         g2d.drawOval((int) pos2[0] , (int) pos2[1] , 5, 5);
 
 
@@ -309,11 +311,11 @@ class GraficContentPanel extends JPanel {
         //**************************************************************************************************
         //**************************************************************************************************
         //**************************************************************************************************
-        //*************K*************************************************************************************
+        //**************************************************************************************************
 
 
-        double[] vectorO_Pos1 = subtractVectors(pos1,multMatVec(M,originh));
-        double[] vectorO_Pos2 = subtractVectors(pos2,multMatVec(M,originh));
+        double[] vectorO_Pos1 = subtractVectors(pos1,multMatVec(projectionMatrix,originH));
+        double[] vectorO_Pos2 = subtractVectors(pos2,multMatVec(projectionMatrix,originH));
         double delta = Math.acos(cosineOfAngleBetweenVectors(vectorO_Pos1,vectorO_Pos2)) ;
 
         double distance = radius * delta;
@@ -323,36 +325,39 @@ class GraficContentPanel extends JPanel {
 
 
        double[] unitVectorP =  normalizeVector(vectorO_Pos1);
-       double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vKectorO_Pos2));
+       double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
        double[] unitVectorU = divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
 
-       double[] testP = multMatVec(M,unitVectorP);
-       double[] testN = multMatVec(M,unitVectorN);
-       double[] testU = multMatVec(M,unitVectorU);
+      /* double[] testP = multMatVec(projectionMatrix,unitVectorP);
+       double[] testN = multMatVec(projectionMatrix,unitVectorN);
+       double[] testU = multMatVec(projectionMatrix,unitVectorU);*/
 
        double[][] TransMatrixD = {
-               {testP[0],testU[0],testN[0],1},
-               {testP[1],testU[1],testN[1],1}
+               {unitVectorP[0],unitVectorU[0],unitVectorN[0]},
+               {unitVectorP[1],unitVectorU[1],unitVectorN[1]},
+               {unitVectorP[2], unitVectorU[2],unitVectorN[2]}
        };
 
 
-       /*for(double t = 0 ; t<= 2*Math.PI ; t+=0.01){
+       double CosDelta = Math.cos(delta);
+       double SinDelta = Math.sin(delta);
+
+       for(double t = 0 ; t<= delta ; t+=0.01){
 
            double[] geodeticCurve =  {
-                   radius * Math.cos(t),
-                   radius * Math.sin(t)
+                   radius * Math.cos(t) *scaleFactor,
+                   radius * Math.sin(t) *scaleFactor,
+                                 0
            };
 
+
            double[]test = multMatVec(TransMatrixD,geodeticCurve);
-           double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
+           //double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
 
            g2d.drawOval((int) test[0] + _0_Constants.WINDOW_WIDTH/2, (int) test[1] + _0_Constants.WINDOW_HEIGHT/2, 10, 10);
 
-
-
-
        }
-*/
+
 
     }
 
@@ -388,7 +393,6 @@ class GraficContentPanel extends JPanel {
         }
         magnitudeP = Math.sqrt(magnitudeP);
         magnitudeQ = Math.sqrt(magnitudeQ);
-        double test = Math.sqrt(4001.0);
         return dotProduct / (magnitudeP * magnitudeQ);
 
     }
@@ -447,8 +451,7 @@ class GraficContentPanel extends JPanel {
         return result;
     }
     public static double[] addVectors(double[] v1, double[] v2)
-    {
-        // Create a new array to store the result
+    {// Create a new array to store the result
         double[] result = new double[v1.length];
 
         // Iterate over the arrays and add their corresponding elements
