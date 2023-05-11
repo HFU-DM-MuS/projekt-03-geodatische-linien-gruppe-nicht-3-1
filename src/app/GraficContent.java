@@ -324,9 +324,9 @@ class GraficContentPanel extends JPanel {
 
 
 
-       double[] unitVectorP =  normalizeVector(vectorO_Pos1);
-       double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
-       double[] unitVectorU = divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
+       double[] unitVectorP = normalizeVector(vectorO_Pos1);
+       double[] unitVectorN =divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
+       double[] unitVectorU =divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
 
       /* double[] testP = multMatVec(projectionMatrix,unitVectorP);
        double[] testN = multMatVec(projectionMatrix,unitVectorN);
@@ -352,9 +352,9 @@ class GraficContentPanel extends JPanel {
 
 
            double[]test = multMatVec(TransMatrixD,geodeticCurve);
-           //double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
+           double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
 
-           g2d.drawOval((int) test[0] + _0_Constants.WINDOW_WIDTH/2, (int) test[1] + _0_Constants.WINDOW_HEIGHT/2, 10, 10);
+           g2d.drawOval((int) miau[0] + _0_Constants.WINDOW_WIDTH/2, (int) miau[1] + _0_Constants.WINDOW_HEIGHT/2, 10, 10);
 
        }
 
