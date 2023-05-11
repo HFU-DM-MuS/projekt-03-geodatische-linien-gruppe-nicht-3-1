@@ -262,7 +262,7 @@ class GraficContentPanel extends JPanel {
         //Make a point on a desired position of the sphere
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.GREEN);
-        double pos1Horizontal_angle = Math.toRadians(38);
+        double pos1Horizontal_angle = Math.toRadians(90);
         double pos1Vertical_angle = Math.toRadians(120);
         double xPos1 =Math.cos(pos1Vertical_angle) * Math.cos(pos1Horizontal_angle);
         double yPos1 =Math.cos(pos1Vertical_angle) * Math.sin(pos1Horizontal_angle);
@@ -282,7 +282,7 @@ class GraficContentPanel extends JPanel {
 
         //Make a point on a desired position of the sphere
         g2d.setColor(Color.cyan);
-        double pos2Horizontal_angle = Math.toRadians(45);
+        double pos2Horizontal_angle = Math.toRadians(90);
         double pos2Vertical_angle = Math.toRadians(45);
 
         double xPos2 =Math.cos(pos2Vertical_angle) * Math.cos(pos2Horizontal_angle);
@@ -322,7 +322,7 @@ class GraficContentPanel extends JPanel {
         g2d.setStroke(new BasicStroke(1.0f));
 
 
-
+        //IMPORTANT: IF THE POINTS ARE IN THE EQUATOR, THEY GET CORRECTLY CONNECTED
 
        double[] unitVectorP = normalizeVector(vectorO_Pos1);
        double[] unitVectorN =divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
@@ -344,7 +344,7 @@ class GraficContentPanel extends JPanel {
 
        double[] anfangsVector = addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(0.0))),multVecWithNumber(unitVectorU, (radius*Math.sin(0.0))));
 
-       for(double t = 0 ; t<= delta ; t+=0.1){
+       for(double t = 0 ; t<= delta ; t+=0.01){
 
            double[] geodeticCurve =  {
                    radius * Math.cos(t) *scaleFactor,
