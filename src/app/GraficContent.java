@@ -262,8 +262,8 @@ class GraficContentPanel extends JPanel {
         //Make a point on a desired position of the sphere
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.GREEN);
-        double pos1Horizontal_angle = Math.toRadians(0);
-        double pos1Vertical_angle = Math.toRadians(90);
+        double pos1Horizontal_angle = Math.toRadians(38);
+        double pos1Vertical_angle = Math.toRadians(120);
         double xPos1 =Math.cos(pos1Vertical_angle) * Math.cos(pos1Horizontal_angle);
         double yPos1 =Math.cos(pos1Vertical_angle) * Math.sin(pos1Horizontal_angle);
         double zPos1 = Math.sin(pos1Vertical_angle);
@@ -342,7 +342,9 @@ class GraficContentPanel extends JPanel {
        double CosDelta = Math.cos(delta);
        double SinDelta = Math.sin(delta);
 
-       for(double t = 0 ; t<= delta ; t+=0.01){
+       double[] anfangsVector = addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(0.0))),multVecWithNumber(unitVectorU, (radius*Math.sin(0.0))));
+
+       for(double t = 0 ; t<= delta ; t+=0.1){
 
            double[] geodeticCurve =  {
                    radius * Math.cos(t) *scaleFactor,
@@ -351,12 +353,20 @@ class GraficContentPanel extends JPanel {
            };
 
 
+
            double[]test = multMatVec(TransMatrixD,geodeticCurve);
-          // double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
+
 
            g2d.drawOval((int) test[0] + _0_Constants.WINDOW_WIDTH/2, (int) test[1] + _0_Constants.WINDOW_HEIGHT/2, 10, 10);
 
+
+           /* double[]endVec =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
+           double[] anfangsVectorProj = multMatVec(projectionMatrix,anfangsVector);
+           double[] endVectorProj = multMatVec(projectionMatrix,endVec);
+           g2d.drawLine((int)endVectorProj[0], (int)endVectorProj[1],(int)anfangsVectorProj[0], (int)anfangsVectorProj[1]);
+           anfangsVector = endVec;*/
        }
+
 
 
     }
