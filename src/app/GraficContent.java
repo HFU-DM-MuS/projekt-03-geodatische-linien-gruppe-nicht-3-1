@@ -4,9 +4,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -14,8 +11,6 @@ import javax.swing.*;
 
 import utils.ApplicationTime;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.io.*;
 
@@ -63,7 +58,7 @@ public class GraficContent extends Animation {
         panel.add(buttonPause);
 
         // set up second panel
-        JLabel scrollLabel = new JLabel("Adjust time scaling:");
+        JLabel scrollLabel = new JLabel("Adjust alpha");
         JLabel timeScalingLabel = new JLabel("Current scaling :");
 
         JLabel currentScaling = new JLabel(String.format("%d", (int) GraficContentPanel.alpha));
@@ -161,13 +156,6 @@ class GraficContentPanel extends JPanel {
 
 
     double radius = 1;
-    double startX = 20;
-    double startY = 20;
-    double vX = 160;
-    double vY = 20;
-    double currentX = startX;
-    double currentY = startY;
-    int diameter = 50;
     public int originX = 0;
     public int originY = 0;
     public static double alpha = Math.toRadians(120);
@@ -188,8 +176,8 @@ class GraficContentPanel extends JPanel {
 
 
         double[][] projectionMatrix = {
-                {-s1 * Math.sin(alpha), s2, 0, _0_Constants.WINDOW_WIDTH / 2},
-                {-s1 * Math.cos(alpha), 0, -s3, _0_Constants.WINDOW_HEIGHT / 2}
+                {-s1 * Math.sin(alpha), s2, 0, originX},
+                {-s1 * Math.cos(alpha), 0, -s3, originY}
                         };
         double[] e1H = {1.0, 0.0, 0.0, 1.0};
         double[] e2H = {0.0, 1.0, 0.0, 1.0};
@@ -197,7 +185,7 @@ class GraficContentPanel extends JPanel {
         double[] originH = {0.0, 0.0, 0.0, 1.0};
 
 
-        //method multiplication of matrix-vector
+        //method multiplication of matrix-vector -> now we can project the Axes correctly
         double[] xAxisEndPoint = multMatVec(projectionMatrix, e1H);
         double[] yAxisEndPoint = multMatVec(projectionMatrix, e2H);
         double[] zAxisEndPoint = multMatVec(projectionMatrix, e3H);
@@ -262,11 +250,13 @@ class GraficContentPanel extends JPanel {
         //Make a point on a desired position of the sphere
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.GREEN);
-        double pos1Horizontal_angle = Math.toRadians(90);
-        double pos1Vertical_angle = Math.toRadians(120);
+        double pos1Horizontal_angle = Math.toRadians(0);
+        double pos1Vertical_angle = Math.toRadians(90);
+
         double xPos1 =Math.cos(pos1Vertical_angle) * Math.cos(pos1Horizontal_angle);
         double yPos1 =Math.cos(pos1Vertical_angle) * Math.sin(pos1Horizontal_angle);
         double zPos1 = Math.sin(pos1Vertical_angle);
+
         double rPos1= Math.sqrt(Math.pow(xPos1,2)+Math.pow(yPos1,2) + Math.pow(zPos1,2));
 
         double[] pos1Cartesian = {
@@ -282,7 +272,7 @@ class GraficContentPanel extends JPanel {
 
         //Make a point on a desired position of the sphere
         g2d.setColor(Color.cyan);
-        double pos2Horizontal_angle = Math.toRadians(90);
+        double pos2Horizontal_angle = Math.toRadians(45);
         double pos2Vertical_angle = Math.toRadians(45);
 
         double xPos2 =Math.cos(pos2Vertical_angle) * Math.cos(pos2Horizontal_angle);
@@ -322,67 +312,66 @@ class GraficContentPanel extends JPanel {
         g2d.setStroke(new BasicStroke(1.0f));
 
 
-        //IMPORTANT: IF THE POINTS ARE IN THE EQUATOR, THEY GET CORRECTLY CONNECTED
-
-       double[] unitVectorP = normalizeVector(vectorO_Pos1);
-       double[] unitVectorN =divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
-       double[] unitVectorU =divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
+       double[] unitVectorP =  normalizeVector(vectorO_Pos1);
+       double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
+       double[] unitVectorU = divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
 
       /* double[] testP = multMatVec(projectionMatrix,unitVectorP);
        double[] testN = multMatVec(projectionMatrix,unitVectorN);
        double[] testU = multMatVec(projectionMatrix,unitVectorU);*/
 
-       double[][] TransMatrixD = {
+
+        /*double[][] transMatrixD = {
+                {0,1,0},
+                {1,0,0},
+                {0,0,1}
+        };*/
+       double[][] transMatrixD = {
                {unitVectorP[0],unitVectorU[0],unitVectorN[0]},
-               {unitVectorP[1],unitVectorU[1],unitVectorN[1]},
+               {unitVectorP[1],      unitVectorU[1]       ,unitVectorN[1]},
                {unitVectorP[2], unitVectorU[2],unitVectorN[2]}
+
        };
-
-
-       double CosDelta = Math.cos(delta);
-       double SinDelta = Math.sin(delta);
-
-       double[] anfangsVector = addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(0.0))),multVecWithNumber(unitVectorU, (radius*Math.sin(0.0))));
 
        for(double t = 0 ; t<= delta ; t+=0.01){
 
            double[] geodeticCurve =  {
-                   radius * Math.cos(t) *scaleFactor,
-                   radius * Math.sin(t) *scaleFactor,
-                                 0
+                   radius * Math.cos(t) ,
+                   radius * Math.sin(t),
+                   1,
            };
 
+           double[] testVector = multMatVec(transMatrixD,geodeticCurve);
+           double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
+           double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
+
+           //double[] test = multMatVec(projectionMatrix,geodeticCurve);
+
+           //double [] testMitProj = multMatVec(transMatrixD,test);
 
 
-           double[]test = multMatVec(TransMatrixD,geodeticCurve);
+           //double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
 
+           g2d.drawOval((int) testMitProj[0]  , (int) testMitProj[1] , 5, 5);
 
-           g2d.drawOval((int) test[0] + _0_Constants.WINDOW_WIDTH/2, (int) test[1] + _0_Constants.WINDOW_HEIGHT/2, 10, 10);
-
-
-           /* double[]endVec =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
-           double[] anfangsVectorProj = multMatVec(projectionMatrix,anfangsVector);
-           double[] endVectorProj = multMatVec(projectionMatrix,endVec);
-           g2d.drawLine((int)endVectorProj[0], (int)endVectorProj[1],(int)anfangsVectorProj[0], (int)anfangsVectorProj[1]);
-           anfangsVector = endVec;*/
        }
-
 
 
     }
 
 
-    private double[] multMatVec(double[][] m, double[] e1h) {
+    private double[] multMatVec(double[][] m, double[] v) {
 
         double[] ResultMatrix = new double[m.length];
         for (int i = 0; i < m.length; i++) {
-            for (int j = 0; j < e1h.length; j++) {
-                ResultMatrix[i] += m[i][j] * e1h[j];
+            for (int j = 0; j < m[0].length; j++) {
+                ResultMatrix[i] += m[i][j] * v[j];
             }
         }
         return ResultMatrix;
 
     }
+
     public static double[] subtractVectors(double[] vector1, double[] vector2) {
 
         double[] result = new double[3];
