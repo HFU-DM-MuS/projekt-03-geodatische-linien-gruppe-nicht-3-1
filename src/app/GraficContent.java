@@ -25,47 +25,23 @@ public class GraficContent extends Animation {
         // Create a new frame
         JFrame controlFrame = new JFrame("Mathematik und Simulation");
         controlFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        controlFrame.setLayout(new GridLayout(1, 2, 10, 0)); // manages the layout of panels in the frame
-
         // Add a JPanel as the new drawing surface
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(2, 4, 5, 0)); // manages the layout of elements in the panel (buttons, labels,
+        panel.setLayout(new GridLayout(2, 1, 5, 5)); // manages the layout of elements in the panel (buttons, labels,
         // other panels, etc.)
         JPanel scrollPanel = new JPanel();
-        scrollPanel.setLayout(new GridLayout(2, 2, 5, 5));
+        scrollPanel.setLayout(new GridLayout(2, 1, 5, 5));
         controlFrame.add(panel);
         controlFrame.add(scrollPanel);
         controlFrame.setVisible(true);
 
-        // set up first Panel
-        buttonContinue = new JButton();
-        buttonContinue.setBackground(Color.WHITE);
-        buttonContinue.addActionListener(new ControlButtons2(buttonContinue, controlFrame, thread));
-        buttonContinue.setText("Continue");
-
-        buttonStop = new JButton();
-        buttonStop.setBackground(Color.WHITE);
-        buttonStop.addActionListener(new ControlButtons2(buttonStop, controlFrame, thread));
-        buttonStop.setText("Stop (forever)");
-
-        buttonPause = new JButton();
-        buttonPause.setBackground(Color.WHITE);
-        buttonPause.addActionListener(new ControlButtons2(buttonPause, controlFrame, thread));
-        buttonPause.setText("Pause");
-
-        panel.add(buttonContinue);
-        panel.add(buttonStop);
-        panel.add(buttonPause);
-
         // set up second panel
         JLabel scrollLabel = new JLabel("Adjust alpha");
-        JLabel timeScalingLabel = new JLabel("Current scaling :");
 
-        JLabel currentScaling = new JLabel(String.format("%d", (int) GraficContentPanel.alpha));
+
         JSlider scrollBar = new JSlider(0, 360, (int) GraficContentPanel.alpha);
         scrollBar.addChangeListener(e -> {
             GraficContentPanel.setAlpha(scrollBar.getValue());
-
 
         });
 
@@ -73,8 +49,6 @@ public class GraficContent extends Animation {
         scrollPanel.add(scrollLabel);
         scrollPanel.add(scrollBar);
 
-        scrollPanel.add(timeScalingLabel);
-        scrollPanel.add(currentScaling);
         controlFrame.pack();
 
     }
@@ -328,19 +302,18 @@ class GraficContentPanel extends JPanel {
         };*/
        double[][] transMatrixD = {
                {unitVectorP[0],unitVectorU[0],unitVectorN[0]},
-               {unitVectorP[1],      unitVectorU[1]       ,unitVectorN[1]},
-               {unitVectorP[2], unitVectorU[2],unitVectorN[2]}
+               {unitVectorP[1],unitVectorU[1],unitVectorN[1]},
+               {unitVectorP[2],unitVectorU[2],unitVectorN[2]}
+                                };
 
-       };
 
        for(double t = 0 ; t<= delta ; t+=0.01){
 
            double[] geodeticCurve =  {
-                   radius * Math.cos(t) ,
+                   radius * Math.cos(t),
                    radius * Math.sin(t),
-                   1,
+                            0
            };
-
            double[] testVector = multMatVec(transMatrixD,geodeticCurve);
            double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
            double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
@@ -461,6 +434,13 @@ class GraficContentPanel extends JPanel {
         // Return the result
         return result;
     }
+    public static void drawSphericalGrid(int linesCount){
+
+
+
+
+    }
+
 }
 
 
