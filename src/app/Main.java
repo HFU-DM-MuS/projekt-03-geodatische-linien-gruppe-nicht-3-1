@@ -5,7 +5,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		Animation animation = null;
-		animation = new GraficContent();
+		animation = new WindowInputsAndTexts();
 		animation.start();
 	}}
 

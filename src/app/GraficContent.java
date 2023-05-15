@@ -15,64 +15,7 @@ import utils.ApplicationTime;
 import java.io.*;
 
 
-public class GraficContent extends Animation {
 
-    static JButton buttonContinue = new JButton();
-    static JButton buttonStop = new JButton();
-    static JButton buttonPause = new JButton();
-
-    private static void createControlFrame(ApplicationTime thread) {
-        // Create a new frame
-        JFrame controlFrame = new JFrame("Mathematik und Simulation");
-        controlFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // Add a JPanel as the new drawing surface
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(2, 1, 5, 5)); // manages the layout of elements in the panel (buttons, labels,
-        // other panels, etc.)
-        JPanel scrollPanel = new JPanel();
-        scrollPanel.setLayout(new GridLayout(2, 1, 5, 5));
-        controlFrame.add(panel);
-        controlFrame.add(scrollPanel);
-        controlFrame.setVisible(true);
-
-        // set up second panel
-        JLabel scrollLabel = new JLabel("Adjust alpha");
-
-
-        JSlider scrollBar = new JSlider(0, 360, (int) GraficContentPanel.alpha);
-        scrollBar.addChangeListener(e -> {
-            GraficContentPanel.setAlpha(scrollBar.getValue());
-
-        });
-
-
-        scrollPanel.add(scrollLabel);
-        scrollPanel.add(scrollBar);
-
-        controlFrame.pack();
-
-    }
-
-
-    @Override
-    protected ArrayList<JFrame> createFrames(ApplicationTime applicationTimeThread) {
-        // a list of all frames (windows) that will be shown
-        ArrayList<JFrame> frames = new ArrayList<>();
-
-        // Create main frame (window)
-        JFrame frame = new JFrame("Mathematik und Simulation");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel panel = new GraficContentPanel(applicationTimeThread);
-        frame.add(panel);
-        frame.pack(); // adjusts size of the JFrame to fit the size of it's components
-        frame.setVisible(true);
-
-        frames.add(frame);
-        createControlFrame(applicationTimeThread);
-        return frames;
-    }
-
-}
 
 class ControlButtons2 implements ActionListener {
     JButton button;
@@ -89,14 +32,8 @@ class ControlButtons2 implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
 
-        if (button.equals(GraficContent.buttonPause)) {
+        if (button.equals(WindowInputsAndTexts.start)) {
             System.out.println("Pause pressed");
-        } else if (button.equals(GraficContent.buttonStop)) {
-
-            System.out.println("Stop pressed, thread ended");
-        } else if (button.equals(GraficContent.buttonContinue)) {
-
-            GraficContentPanel.drawLine();
         }
     }
 }
@@ -109,18 +46,28 @@ class GraficContentPanel extends JPanel {
 
     }
 
+    public static void setPos1XY(double X, double Y) {
+
+        Pos1X = Math.toRadians(X);
+        Pos1Y = Math.toRadians(Y);
+    }
+    public static void setPos2XY(double X, double Y) {
+
+        Pos2X = Math.toRadians(X);
+        Pos2Y = Math.toRadians(Y);
+    }
+    public static void startTimer() {
+
+        timer.start();
+    }
+
     // panel has a single time tracking thread associated with it
     private final ApplicationTime t;
 
-    private double time;
+    static public double time;
 
     public GraficContentPanel(ApplicationTime thread) {
         this.t = thread;
-    }
-
-    public static void drawLine() {
-
-
     }
 
     // set this panel's preferred size for auto-sizing the container JFrame
@@ -128,11 +75,16 @@ class GraficContentPanel extends JPanel {
         return new Dimension(_0_Constants.WINDOW_WIDTH, _0_Constants.WINDOW_HEIGHT);
     }
 
-
+   public static Timer timer;
     double radius = 1;
     public int originX = 0;
     public int originY = 0;
     public static double alpha = Math.toRadians(120);
+double lastFrameTime = 0.0;
+    public static double Pos1X;
+    public static double Pos1Y;
+    public static double Pos2X;
+    public static double Pos2Y;
 
     // drawing operations should be done in this method
     @Override
@@ -142,7 +94,6 @@ class GraficContentPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d;
         g2d = (Graphics2D) g;
-
         double scaleFactor = 200.0;
         double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
         double s2 = scaleFactor * 1.0;
@@ -167,7 +118,7 @@ class GraficContentPanel extends JPanel {
 
         super.paintComponent(g);
         time = t.getTimeInSeconds();
-
+        System.out.println(timer);
 
         //Draw Background
         g.setColor(Color.BLACK);
@@ -194,13 +145,13 @@ class GraficContentPanel extends JPanel {
             for (double j = 0; j <= 1; j += 0.1) {
 
                 double phi = j * Math.PI;
-                double sphere[] = {radius * Math.cos(theta) * Math.cos(phi),
+                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
                         radius * Math.sin(theta),
                         1
                 };
-                double longitud[] = multMatVec(projectionMatrix, sphere);
-                g2d.drawOval((int) longitud[0] , (int) longitud[1] , 1, 1);
+                double[] longitude = multMatVec(projectionMatrix, sphere);
+                g2d.drawOval((int) longitude[0] , (int) longitude[1] , 1, 1);
             }
         }
         // Draw the latitudinal lines
@@ -210,13 +161,13 @@ class GraficContentPanel extends JPanel {
             for (double j = 0; j <= 1; j += 0.1) {
                 double theta = j * 2 * Math.PI;
 
-                double sphere[] = {radius * Math.cos(theta) * Math.cos(phi),
+                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
                         radius * Math.sin(theta),
                         1
                 };
-                double latitud[] = multMatVec(projectionMatrix, sphere);
-                g2d.drawOval((int) latitud[0] , (int) latitud[1] , 1, 1);
+                double[] latitude = multMatVec(projectionMatrix, sphere);
+                g2d.drawOval((int) latitude[0] , (int) latitude[1] , 1, 1);
             }
         }
 
@@ -224,8 +175,8 @@ class GraficContentPanel extends JPanel {
         //Make a point on a desired position of the sphere
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.GREEN);
-        double pos1Horizontal_angle = Math.toRadians(0);
-        double pos1Vertical_angle = Math.toRadians(90);
+        double pos1Horizontal_angle = Pos1X;
+        double pos1Vertical_angle = Pos1Y;
 
         double xPos1 =Math.cos(pos1Vertical_angle) * Math.cos(pos1Horizontal_angle);
         double yPos1 =Math.cos(pos1Vertical_angle) * Math.sin(pos1Horizontal_angle);
@@ -246,8 +197,8 @@ class GraficContentPanel extends JPanel {
 
         //Make a point on a desired position of the sphere
         g2d.setColor(Color.cyan);
-        double pos2Horizontal_angle = Math.toRadians(45);
-        double pos2Vertical_angle = Math.toRadians(45);
+        double pos2Horizontal_angle = Pos2X;
+        double pos2Vertical_angle = Pos2Y;
 
         double xPos2 =Math.cos(pos2Vertical_angle) * Math.cos(pos2Horizontal_angle);
         double yPos2 =Math.cos(pos2Vertical_angle) * Math.sin(pos2Horizontal_angle);
@@ -278,8 +229,8 @@ class GraficContentPanel extends JPanel {
         //**************************************************************************************************
 
 
-        double[] vectorO_Pos1 = subtractVectors(pos1,multMatVec(projectionMatrix,originH));
-        double[] vectorO_Pos2 = subtractVectors(pos2,multMatVec(projectionMatrix,originH));
+        double[] vectorO_Pos1 = subtractVectors(pos1Cartesian,originH);
+        double[] vectorO_Pos2 = subtractVectors(pos2Cartesian,originH);
         double delta = Math.acos(cosineOfAngleBetweenVectors(vectorO_Pos1,vectorO_Pos2)) ;
 
         double distance = radius * delta;
@@ -306,6 +257,8 @@ class GraficContentPanel extends JPanel {
                {unitVectorP[2],unitVectorU[2],unitVectorN[2]}
                                 };
 
+        double deltaTime = time-lastFrameTime;
+        lastFrameTime=time;
 
        for(double t = 0 ; t<= delta ; t+=0.01){
 
@@ -318,12 +271,6 @@ class GraficContentPanel extends JPanel {
            double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
            double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
 
-           //double[] test = multMatVec(projectionMatrix,geodeticCurve);
-
-           //double [] testMitProj = multMatVec(transMatrixD,test);
-
-
-           //double[]miau =  addVectors(multVecWithNumber(unitVectorP, (radius*Math.cos(t))),multVecWithNumber(unitVectorU, (radius*Math.sin(t))));
 
            g2d.drawOval((int) testMitProj[0]  , (int) testMitProj[1] , 5, 5);
 
@@ -347,8 +294,7 @@ class GraficContentPanel extends JPanel {
 
     public static double[] subtractVectors(double[] vector1, double[] vector2) {
 
-        double[] result = new double[3];
-        result[2] = 1;
+        double[] result = new double[vector1.length];
         for (int i = 0; i <= vector1.length-1; i++) {
             result[i] = vector1[i] - vector2[i];
         }
@@ -434,12 +380,7 @@ class GraficContentPanel extends JPanel {
         // Return the result
         return result;
     }
-    public static void drawSphericalGrid(int linesCount){
 
-
-
-
-    }
 
 }
 
