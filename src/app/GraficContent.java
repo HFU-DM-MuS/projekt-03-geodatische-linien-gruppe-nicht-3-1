@@ -3,18 +3,12 @@ package app;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.*;
 
 import utils.ApplicationTime;
-
-
-import java.io.*;
-
-
 
 
 class ControlButtons2 implements ActionListener {
@@ -56,9 +50,20 @@ class GraficContentPanel extends JPanel {
         Pos2X = Math.toRadians(X);
         Pos2Y = Math.toRadians(Y);
     }
-    public static void startTimer() {
 
-        timer.start();
+    public static void startAnimation() {
+
+       tDelta = 0;
+    }
+
+    public static void setS1ScaleFactor(double x) {
+
+        s1ScaleFactor = x/100;
+    }
+
+    public static double getDistance(){
+
+        return distance;
     }
 
     // panel has a single time tracking thread associated with it
@@ -85,17 +90,20 @@ double lastFrameTime = 0.0;
     public static double Pos1Y;
     public static double Pos2X;
     public static double Pos2Y;
+    public static double tDelta = 0;
+    public static double distance = 0;
+    public static double s1ScaleFactor = 1;
 
     // drawing operations should be done in this method
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g){
         originX = _0_Constants.WINDOW_WIDTH / 2;
         originY = _0_Constants.WINDOW_HEIGHT / 2;
         super.paintComponent(g);
         Graphics2D g2d;
         g2d = (Graphics2D) g;
         double scaleFactor = 200.0;
-        double s1 = scaleFactor * (1.0 / Math.sqrt(2.0));
+        double s1 = scaleFactor * (s1ScaleFactor / Math.sqrt(2.0));
         double s2 = scaleFactor * 1.0;
         double s3 = scaleFactor * 1.0;
 
@@ -118,7 +126,7 @@ double lastFrameTime = 0.0;
 
         super.paintComponent(g);
         time = t.getTimeInSeconds();
-        System.out.println(timer);
+
 
         //Draw Background
         g.setColor(Color.BLACK);
@@ -216,24 +224,18 @@ double lastFrameTime = 0.0;
         double[] pos2 = multMatVec(projectionMatrix,pos2Cartesian);
         g2d.drawOval((int) pos2[0] , (int) pos2[1] , 5, 5);
 
-
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************DANGER ZONE*************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-        //**************************************************************************************************
-
-
         double[] vectorO_Pos1 = subtractVectors(pos1Cartesian,originH);
         double[] vectorO_Pos2 = subtractVectors(pos2Cartesian,originH);
         double delta = Math.acos(cosineOfAngleBetweenVectors(vectorO_Pos1,vectorO_Pos2)) ;
 
-        double distance = radius * delta;
+        int earthRadius = 6371000; //metres
+
+
+        distance = radius * delta;
+        double distest = Math.acos(Math.sin(Pos1X)*Math.sin(Pos2X)+Math.cos(Pos1X)*Math.cos(Pos2X)*Math.cos(Pos2Y-Pos1Y))*6371;
+        WindowInputsAndTexts.distanceP1P2.setText(String.valueOf((int) distest) + "Km");
+
+
         g2d.setStroke(new BasicStroke(1.0f));
 
 
@@ -241,44 +243,32 @@ double lastFrameTime = 0.0;
        double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
        double[] unitVectorU = divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
 
-      /* double[] testP = multMatVec(projectionMatrix,unitVectorP);
-       double[] testN = multMatVec(projectionMatrix,unitVectorN);
-       double[] testU = multMatVec(projectionMatrix,unitVectorU);*/
 
-
-        /*double[][] transMatrixD = {
-                {0,1,0},
-                {1,0,0},
-                {0,0,1}
-        };*/
        double[][] transMatrixD = {
                {unitVectorP[0],unitVectorU[0],unitVectorN[0]},
                {unitVectorP[1],unitVectorU[1],unitVectorN[1]},
                {unitVectorP[2],unitVectorU[2],unitVectorN[2]}
                                 };
 
-        double deltaTime = time-lastFrameTime;
-        lastFrameTime=time;
 
-       for(double t = 0 ; t<= delta ; t+=0.01){
+       tDelta += 0.01;
 
-           double[] geodeticCurve =  {
-                   radius * Math.cos(t),
-                   radius * Math.sin(t),
+       double[] geodeticCurve =  {
+                   radius * Math.cos(tDelta),
+                   radius * Math.sin(tDelta),
                             0
-           };
+       };
            double[] testVector = multMatVec(transMatrixD,geodeticCurve);
            double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
            double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
 
+           g2d.drawOval((int) testMitProj[0] , (int) testMitProj[1] , 5, 5);
 
-           g2d.drawOval((int) testMitProj[0]  , (int) testMitProj[1] , 5, 5);
+           if(tDelta >= delta) { tDelta = delta;}
 
-       }
 
 
     }
-
 
     private double[] multMatVec(double[][] m, double[] v) {
 
@@ -291,7 +281,6 @@ double lastFrameTime = 0.0;
         return ResultMatrix;
 
     }
-
     public static double[] subtractVectors(double[] vector1, double[] vector2) {
 
         double[] result = new double[vector1.length];
@@ -368,8 +357,7 @@ double lastFrameTime = 0.0;
 
         return result;
     }
-    public static double[] addVectors(double[] v1, double[] v2)
-    {// Create a new array to store the result
+    public static double[] addVectors(double[] v1, double[] v2) {// Create a new array to store the result
         double[] result = new double[v1.length];
 
         // Iterate over the arrays and add their corresponding elements
@@ -380,8 +368,6 @@ double lastFrameTime = 0.0;
         // Return the result
         return result;
     }
-
-
 }
 
 
