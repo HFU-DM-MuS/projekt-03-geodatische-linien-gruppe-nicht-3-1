@@ -1,47 +1,46 @@
 package app;
-
 import utils.ApplicationTime;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class WindowInputsAndTexts extends Animation {
+public class AnimationWindowPanel extends Animation {
     static JButton start = new JButton("Start");
-    static JLabel distanceP1P2 = new JLabel(String.valueOf(GraficContentPanel.getDistance()) + "Km");
+    static JLabel distanceP1P2 = new JLabel();
     private static void createControlFrame(ApplicationTime thread) {
+
         // Create a new frame
         JFrame controlFrame = new JFrame("Mathematik und Simulation");
         controlFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // Add a JPanel as the new drawing surface
+
+        //create a control panel where all the components will be put
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(4, 4, 2, 2)); // manages the layout of elements in the panel (buttons, labels,
-        // other panels, etc.)
-        JPanel scrollPanel = new JPanel();
-        scrollPanel.setLayout(new GridLayout(4, 4, 2, 2));
+        panel.setLayout(new GridLayout(4, 4, 2, 2));
         controlFrame.add(panel);
-        controlFrame.add(scrollPanel);
         controlFrame.setVisible(true);
 
 
-        // set up second panel
+        // Create slider to adjust alpha
         JLabel adjustAlpha = new JLabel("Adjust alpha");
-        JSlider adjustAlphaSlider = new JSlider(0, 360, (int) Math.toDegrees(GraficContentPanel.alpha));
+        JSlider adjustAlphaSlider = new JSlider(0, 360, (int) Math.toDegrees(GraphicContent.alpha));
         adjustAlphaSlider.addChangeListener(e -> {
-            GraficContentPanel.setAlpha(adjustAlphaSlider.getValue());
+            GraphicContent.setAlpha(adjustAlphaSlider.getValue());
         });
 
+        // Create slider to adjust S1
         JLabel adjustS1 = new JLabel("Adjust S1");
-        JSlider adjustS1Slider = new JSlider(0, 100, (int) GraficContentPanel.s1ScaleFactor*100);
+        JSlider adjustS1Slider = new JSlider(0, 100, (int) GraphicContent.s1ScaleFactor*100);
         adjustS1Slider.addChangeListener(e -> {
-            GraficContentPanel.setS1ScaleFactor(adjustS1Slider.getValue());
+            GraphicContent.setS1ScaleFactor(adjustS1Slider.getValue());
         });
 
+        //Create Input for Pos1XY
         JLabel pos1X = new JLabel("Pos1 X (e.g:90)");
         JTextField pos1XInput = new JTextField("0");
         JLabel pos1Y = new JLabel("Pos1 Y");
         JTextField pos1YInput = new JTextField("0");
 
+        //Create Input for Pos2XY
         JLabel pos2Y = new JLabel("Pos2 Y (e.g:45)");
         JTextField pos2YInput = new JTextField("0");
         JLabel pos2X = new JLabel("Pos2 X");
@@ -49,52 +48,46 @@ public class WindowInputsAndTexts extends Animation {
 
         JLabel distance = new JLabel("Distance between Pos1 and Pos2");
 
-
         JLabel startInstructions = new JLabel("Press Start to begin the animation");
 
+        //Add everything to the panel
+
+        panel.add(adjustAlpha);
+        panel.add(adjustAlphaSlider);
 
 
+        panel.add(start);
+        panel.add(startInstructions);
 
-        scrollPanel.add(adjustAlpha);
-        scrollPanel.add(adjustAlphaSlider);
+        panel.add(adjustS1);
+        panel.add(adjustS1Slider);
 
+        panel.add(distance);
+        panel.add(distanceP1P2);
 
-        scrollPanel.add(start);
-        scrollPanel.add(startInstructions);
+        panel.add(pos1X);
+        panel.add(pos1XInput);
 
-        scrollPanel.add(adjustS1);
-        scrollPanel.add(adjustS1Slider);
+        panel.add(pos2X);
+        panel.add(pos2XInput);
 
-        scrollPanel.add(distance);
-        scrollPanel.add(distanceP1P2);
+        panel.add(pos1Y);
+        panel.add(pos1YInput);
 
-        scrollPanel.add(pos1X);
-        scrollPanel.add(pos1XInput);
-
-        scrollPanel.add(pos2X);
-        scrollPanel.add(pos2XInput);
-
-
-
-
-
-        scrollPanel.add(pos1Y);
-        scrollPanel.add(pos1YInput);
-
-
-        scrollPanel.add(pos2Y);
-        scrollPanel.add(pos2YInput);
+        panel.add(pos2Y);
+        panel.add(pos2YInput);
 
         controlFrame.pack();
 
+        //When start is pressed, get the values inside the text fields
         start.addActionListener(e ->{
             double pos1XDouble = Double.parseDouble(pos1XInput.getText());
             double pos1YDouble = Double.parseDouble(pos1YInput.getText());
             double pos2XDouble = Double.parseDouble(pos2XInput.getText());
             double pos2YDouble = Double.parseDouble(pos2YInput.getText());
-            GraficContentPanel.setPos1XY(pos1XDouble, pos1YDouble);
-            GraficContentPanel.setPos2XY(pos2XDouble, pos2YDouble);
-            GraficContentPanel.startAnimation();
+            GraphicContent.setPos1XY(pos1XDouble, pos1YDouble);
+            GraphicContent.setPos2XY(pos2XDouble, pos2YDouble);
+            GraphicContent.startAnimation();
         });
 
     }
@@ -108,7 +101,7 @@ public class WindowInputsAndTexts extends Animation {
         // Create main frame (window)
         JFrame frame = new JFrame("Mathematik und Simulation");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel panel = new GraficContentPanel(applicationTimeThread);
+        JPanel panel = new GraphicContent(applicationTimeThread);
         frame.add(panel);
         frame.pack(); // adjusts size of the JFrame to fit the size of it's components
         frame.setVisible(true);
