@@ -43,12 +43,12 @@ class GraficContentPanel extends JPanel {
     public static void setPos1XY(double X, double Y) {
 
         Pos1X = Math.toRadians(X);
-        Pos1Y = Math.toRadians(Y);
+        Pos1Y = Math.toRadians(Y+90);
     }
     public static void setPos2XY(double X, double Y) {
 
         Pos2X = Math.toRadians(X);
-        Pos2Y = Math.toRadians(Y);
+        Pos2Y = Math.toRadians(Y+90);
     }
 
     public static void startAnimation() {
@@ -87,12 +87,15 @@ class GraficContentPanel extends JPanel {
     public static double alpha = Math.toRadians(120);
 double lastFrameTime = 0.0;
     public static double Pos1X;
-    public static double Pos1Y;
+    public static double Pos1Y = Math.toRadians(90);
     public static double Pos2X;
-    public static double Pos2Y;
+    public static double Pos2Y= Math.toRadians(91);
     public static double tDelta = 0;
     public static double distance = 0;
     public static double s1ScaleFactor = 1;
+
+    private double phi_p;
+    private double theta_p;
 
     // drawing operations should be done in this method
     @Override
@@ -145,40 +148,6 @@ double lastFrameTime = 0.0;
         g.setColor(Color.RED);
         g.drawLine(originX, originY, (int) xAxisEndPoint[0], (int) xAxisEndPoint[1]);
 
-        // Draw the longitudinal lines
-        g2d.setStroke(new BasicStroke(1.0f));
-        g.setColor(Color.GRAY);
-        for (double i = 0; i <= 1; i += 0.001) {
-            double theta = i * 2 * Math.PI;
-            for (double j = 0; j <= 1; j += 0.1) {
-
-                double phi = j * Math.PI;
-                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
-                        radius * Math.cos(theta) * Math.sin(phi),
-                        radius * Math.sin(theta),
-                        1
-                };
-                double[] longitude = multMatVec(projectionMatrix, sphere);
-                g2d.drawOval((int) longitude[0] , (int) longitude[1] , 1, 1);
-            }
-        }
-        // Draw the latitudinal lines
-
-        for (double i = 0; i <= 1; i += 0.001) {
-            double phi = i * 2 * Math.PI;
-            for (double j = 0; j <= 1; j += 0.1) {
-                double theta = j * 2 * Math.PI;
-
-                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
-                        radius * Math.cos(theta) * Math.sin(phi),
-                        radius * Math.sin(theta),
-                        1
-                };
-                double[] latitude = multMatVec(projectionMatrix, sphere);
-                g2d.drawOval((int) latitude[0] , (int) latitude[1] , 1, 1);
-            }
-        }
-
 
         //Make a point on a desired position of the sphere
         g2d.setStroke(new BasicStroke(3.0f));
@@ -215,25 +184,59 @@ double lastFrameTime = 0.0;
         double rPos2= Math.sqrt(Math.pow(xPos2,2)+Math.pow(yPos2,2) + Math.pow(zPos2,2));
 
         double[] pos2Cartesian = {
-               rPos2 * xPos2,
-               rPos2 * yPos2,
-               rPos2 * zPos2,
+                rPos2 * xPos2,
+                rPos2 * yPos2,
+                rPos2 * zPos2,
                 1
         };
 
         double[] pos2 = multMatVec(projectionMatrix,pos2Cartesian);
         g2d.drawOval((int) pos2[0] , (int) pos2[1] , 5, 5);
+        // Draw the longitudinal lines
+        g2d.setStroke(new BasicStroke(1.0f));
+        g.setColor(Color.darkGray);
+        for (double i = 0; i <= 1; i += 0.001) {
+            double theta = i * 2 * Math.PI;
+            for (double j = 0; j <= 1; j += 0.1) {
+                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.lightGray);}
+                double phi = j * Math.PI;
+                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
+                        radius * Math.cos(theta) * Math.sin(phi),
+                        radius * Math.sin(theta),
+                        1
+                };
+                double[] longitude = multMatVec(projectionMatrix, sphere);
+                g2d.drawOval((int) longitude[0] , (int) longitude[1] , 1, 1);
+            }
+        }
+        // Draw the latitudinal lines
+
+        for (double i = 0; i <= 1; i += 0.001) {
+            double phi = i * 2 * Math.PI;
+            for (double j = 0; j <= 1; j += 0.1) {
+                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.lightGray);}
+                double theta = j * 2 * Math.PI;
+
+                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
+                        radius * Math.cos(theta) * Math.sin(phi),
+                        radius * Math.sin(theta),
+                        1
+                };
+                double[] latitude = multMatVec(projectionMatrix, sphere);
+                g2d.drawOval((int) latitude[0] , (int) latitude[1] , 1, 1);
+            }
+        }
+
+
+
 
         double[] vectorO_Pos1 = subtractVectors(pos1Cartesian,originH);
         double[] vectorO_Pos2 = subtractVectors(pos2Cartesian,originH);
         double delta = Math.acos(cosineOfAngleBetweenVectors(vectorO_Pos1,vectorO_Pos2)) ;
 
-        int earthRadius = 6371000; //metres
-
-
-        distance = radius * delta;
-        double distest = Math.acos(Math.sin(Pos1X)*Math.sin(Pos2X)+Math.cos(Pos1X)*Math.cos(Pos2X)*Math.cos(Pos2Y-Pos1Y))*6371;
-        WindowInputsAndTexts.distanceP1P2.setText(String.valueOf((int) distest) + "Km");
+        int earthRadius = 6371; //km
+        distance = Math.acos(Math.sin(Pos1X)*Math.sin(Pos2X)+Math.cos(Pos1X)*Math.cos(Pos2X)*Math.cos(Pos2Y-Pos1Y))*earthRadius;
+        WindowInputsAndTexts.distanceP1P2.setText(String.valueOf((int) distance) + "Km");
 
 
         g2d.setStroke(new BasicStroke(1.0f));
@@ -258,15 +261,46 @@ double lastFrameTime = 0.0;
                    radius * Math.sin(tDelta),
                             0
        };
-           double[] testVector = multMatVec(transMatrixD,geodeticCurve);
-           double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
-           double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
+       double[] testVector = multMatVec(transMatrixD,geodeticCurve);
+       double[] test2Vector = {testVector[0],testVector[1],testVector[2],1};
+       double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
+       g2d.setColor(Color.magenta);
+       g2d.fillOval((int) testMitProj[0] , (int) testMitProj[1] , 10, 10);
+       if(tDelta >= delta) { tDelta = delta;}
+       /*
+        phi_p = Math.toDegrees(Math.atan(s1 * Math.sin(Math.toRadians(alpha))));
+        theta_p = Math.toDegrees(Math.atan(-s1 * Math.cos(Math.toRadians(alpha)) * Math.cos(Math.atan(s1 * Math.sin(alpha)))));
+      for(double t = 0; t<=delta;t+=0.1 ) {
 
-           g2d.drawOval((int) testMitProj[0] , (int) testMitProj[1] , 5, 5);
+           double [][] matrix1 = {
+                   {-s1*Math.sin(alpha),1,0},
+                   {s1*Math.cos(alpha),0,1}
+           };
+           double [][] matrix2 = {
+                   {Math.cos(t),-Math.sin(t),0},
+                   {Math.sin(t),Math.cos(t),0},
+                   {0,0,1}
+           };
+           double [][] matrix3 = {
+                   {Math.cos(t),0,-Math.sin(t)},
+                   {0,1,0},
+                   {Math.sin(t),0,Math.cos(t)}
+           };
+           double[] vector1 = {
+                            0,
+                            radius*scaleFactor*Math.cos(t),
+                            radius*scaleFactor*Math.sin(t)
+                            };
 
-           if(tDelta >= delta) { tDelta = delta;}
 
+           double[] ut = multMatVec(multiplyMatrices(matrix1,matrix2),multMatVec(matrix3,vector1));
 
+           double [] uts = {ut[0], ut[1],0,1};
+
+           double[] mumu = multMatVec(projectionMatrix,uts);
+
+           g2d.drawOval((int) mumu[0] , (int) mumu[1] , 10, 10);
+       }*/
 
     }
 
@@ -368,7 +402,28 @@ double lastFrameTime = 0.0;
         // Return the result
         return result;
     }
-}
+    public static double[][] multiplyMatrices(double[][] matrix1, double[][] matrix2) {
+        int rows1 = matrix1.length;
+        int cols1 = matrix1[0].length;
+        int cols2 = matrix2[0].length;
+
+        double[][] result = new double[rows1][cols2];
+
+        for (int i = 0; i < rows1; i++) {
+            for (int j = 0; j < cols2; j++) {
+                int sum = 0;
+                for (int k = 0; k < cols1; k++) {
+                    sum += matrix1[i][k] * matrix2[k][j];
+                }
+                result[i][j] = sum;
+            }
+        }
+
+        return result;
+    }
+
+    }
+
 
 
 
