@@ -89,7 +89,7 @@ double lastFrameTime = 0.0;
     public static double Pos1X;
     public static double Pos1Y = Math.toRadians(90);
     public static double Pos2X;
-    public static double Pos2Y= Math.toRadians(91);
+    public static double Pos2Y= Math.toRadians(90.001);
     public static double tDelta = 0;
     public static double distance = 0;
     public static double s1ScaleFactor = 1;
@@ -190,24 +190,34 @@ double lastFrameTime = 0.0;
                 1
         };
 
+
+
         double[] pos2 = multMatVec(projectionMatrix,pos2Cartesian);
         g2d.drawOval((int) pos2[0] , (int) pos2[1] , 5, 5);
 
+       // theta_p = Math.toDegrees(Math.atan(s1 * Math.cos(Math.toRadians(alpha)) * Math.cos(Math.atan(s1 * Math.sin(Math.toRadians(alpha))))));
+        //phi_p = Math.toDegrees(Math.atan(s1 * Math.sin(Math.toRadians(alpha))));
+
         // Draw the longitudinal lines
         g2d.setStroke(new BasicStroke(1.0f));
-        g.setColor(Color.darkGray);
+        g.setColor(Color.lightGray);
         for (double i = 0; i <= 1; i += 0.001) {
             double theta = i * 2 * Math.PI;
             for (double j = 0; j <= 1; j += 0.1) {
-                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*pos1Cartesian[0]+Math.sin(Pos1X)*Math.cos(Pos1Y)+pos1Cartesian[1]+Math.sin(Pos1Y)*pos1Cartesian[2]>0 ){g.setColor(Color.pink);}
-                else if(Math.cos(Pos1X)*Math.cos(Pos1Y)*pos1Cartesian[0]+Math.sin(Pos1X)*Math.cos(Pos1Y)+pos1Cartesian[1]+Math.sin(Pos1Y)*pos1Cartesian[2]<0 ){g.setColor(Color.green);}
-                {g.setColor(Color.green);}
+
                 double phi = j * Math.PI;
-                double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
+
+                double[] sphere = {
+                        radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
                         radius * Math.sin(theta),
                         1
                 };
+                 /*
+                double probo = Math.cos(phi) * Math.cos(theta) * sphere[0] + Math.sin(phi) * Math.cos(theta) + sphere[1] + Math.sin(theta) * sphere[2];
+                if(probo >0 ){g.setColor(Color.lightGray);}
+                else  if(probo <0 ){g.setColor(Color.darkGray);}
+                */
                 double[] longitude = multMatVec(projectionMatrix, sphere);
                 g2d.drawOval((int) longitude[0] , (int) longitude[1] , 1, 1);
             }
@@ -217,9 +227,8 @@ double lastFrameTime = 0.0;
         for (double i = 0; i <= 1; i += 0.001) {
             double phi = i * 2 * Math.PI;
             for (double j = 0; j <= 1; j += 0.1) {
-                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.pink);}
-                else if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1<0 )
-                {g.setColor(Color.green);}
+
+
                 double theta = j * 2 * Math.PI;
 
                 double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
@@ -227,6 +236,11 @@ double lastFrameTime = 0.0;
                         radius * Math.sin(theta),
                         1
                 };
+
+              /*  double probo = Math.cos(phi) * Math.cos(theta) * sphere[0] + Math.sin(phi) * Math.cos(theta) + sphere[1] + Math.sin(theta) * sphere[2];
+                if(probo >0 ){g.setColor(Color.lightGray);}
+                else  if(probo <0 ){g.setColor(Color.darkGray);}
+                */
                 double[] latitude = multMatVec(projectionMatrix, sphere);
                 g2d.drawOval((int) latitude[0] , (int) latitude[1] , 1, 1);
             }
@@ -271,41 +285,22 @@ double lastFrameTime = 0.0;
        double [] testMitProj = multMatVec(projectionMatrix,test2Vector);
        g2d.setColor(Color.magenta);
        g2d.fillOval((int) testMitProj[0] , (int) testMitProj[1] , 10, 10);
-       if(tDelta >= delta) { tDelta = delta;}
-       /*
-        phi_p = Math.toDegrees(Math.atan(s1 * Math.sin(Math.toRadians(alpha))));
-        theta_p = Math.toDegrees(Math.atan(-s1 * Math.cos(Math.toRadians(alpha)) * Math.cos(Math.atan(s1 * Math.sin(alpha)))));
-      for(double t = 0; t<=delta;t+=0.1 ) {
 
-           double [][] matrix1 = {
-                   {-s1*Math.sin(alpha),1,0},
-                   {s1*Math.cos(alpha),0,1}
-           };
-           double [][] matrix2 = {
-                   {Math.cos(t),-Math.sin(t),0},
-                   {Math.sin(t),Math.cos(t),0},
-                   {0,0,1}
-           };
-           double [][] matrix3 = {
-                   {Math.cos(t),0,-Math.sin(t)},
-                   {0,1,0},
-                   {Math.sin(t),0,Math.cos(t)}
-           };
-           double[] vector1 = {
-                            0,
-                            radius*scaleFactor*Math.cos(t),
-                            radius*scaleFactor*Math.sin(t)
-                            };
+       if(tDelta >= delta) { tDelta = delta;
+        for(double i = 0; i<=delta;i+=0.1) {
+            geodeticCurve = new double[]{
+                    radius * Math.cos(i),
+                    radius * Math.sin(i),
+                    0
+            };
+            testVector = multMatVec(transMatrixD, geodeticCurve);
+            test2Vector = new double[]{testVector[0], testVector[1], testVector[2], 1};
+            testMitProj = multMatVec(projectionMatrix, test2Vector);
+            g2d.setColor(Color.magenta);
+            g2d.fillOval((int) testMitProj[0], (int) testMitProj[1], 10, 10);
+        }
 
-
-           double[] ut = multMatVec(multiplyMatrices(matrix1,matrix2),multMatVec(matrix3,vector1));
-
-           double [] uts = {ut[0], ut[1],0,1};
-
-           double[] mumu = multMatVec(projectionMatrix,uts);
-
-           g2d.drawOval((int) mumu[0] , (int) mumu[1] , 10, 10);
-       }*/
+       }
 
     }
 
