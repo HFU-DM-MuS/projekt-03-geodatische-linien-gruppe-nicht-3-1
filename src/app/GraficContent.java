@@ -192,13 +192,16 @@ double lastFrameTime = 0.0;
 
         double[] pos2 = multMatVec(projectionMatrix,pos2Cartesian);
         g2d.drawOval((int) pos2[0] , (int) pos2[1] , 5, 5);
+
         // Draw the longitudinal lines
         g2d.setStroke(new BasicStroke(1.0f));
         g.setColor(Color.darkGray);
         for (double i = 0; i <= 1; i += 0.001) {
             double theta = i * 2 * Math.PI;
             for (double j = 0; j <= 1; j += 0.1) {
-                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.lightGray);}
+                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*pos1Cartesian[0]+Math.sin(Pos1X)*Math.cos(Pos1Y)+pos1Cartesian[1]+Math.sin(Pos1Y)*pos1Cartesian[2]>0 ){g.setColor(Color.pink);}
+                else if(Math.cos(Pos1X)*Math.cos(Pos1Y)*pos1Cartesian[0]+Math.sin(Pos1X)*Math.cos(Pos1Y)+pos1Cartesian[1]+Math.sin(Pos1Y)*pos1Cartesian[2]<0 ){g.setColor(Color.green);}
+                {g.setColor(Color.green);}
                 double phi = j * Math.PI;
                 double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
                         radius * Math.cos(theta) * Math.sin(phi),
@@ -214,7 +217,9 @@ double lastFrameTime = 0.0;
         for (double i = 0; i <= 1; i += 0.001) {
             double phi = i * 2 * Math.PI;
             for (double j = 0; j <= 1; j += 0.1) {
-                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.lightGray);}
+                if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1>0 ){g.setColor(Color.pink);}
+                else if(Math.cos(Pos1X)*Math.cos(Pos1Y)*xPos1+Math.sin(Pos1X)*Math.cos(Pos1Y)+yPos1+Math.sin(Pos1Y)*zPos1<0 )
+                {g.setColor(Color.green);}
                 double theta = j * 2 * Math.PI;
 
                 double[] sphere = {radius * Math.cos(theta) * Math.cos(phi),
