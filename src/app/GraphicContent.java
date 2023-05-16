@@ -136,11 +136,8 @@ class GraphicContent extends JPanel {
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.GREEN);
 
-
-
         double pos1Horizontal_angle = Pos1X; //Pos1X is defined by the user through the InputWindow
         double pos1Vertical_angle = Pos1Y; //Pos1Y is defined by the user through the InputWindow
-
 
         //Calculate the XYZ coords of Pos1 by transforming the Lat and Lon into 3d coords
         double xPos1 =Math.cos(pos1Vertical_angle) * Math.cos(pos1Horizontal_angle);
@@ -204,14 +201,12 @@ class GraphicContent extends JPanel {
        double[] unitVectorN = divVecWithNumber(crossProduct(vectorO_Pos1, vectorO_Pos2),crossProductMagnitude(vectorO_Pos1,vectorO_Pos2));
        double[] unitVectorU = divVecWithNumber(crossProduct(unitVectorN, unitVectorP),crossProductMagnitude(unitVectorN,unitVectorP));
 
-        //define transformation Matrix using the unit vectors
+       //define transformation Matrix using the unit vectors
        double[][] transMatrixD = {
                {unitVectorP[0],unitVectorU[0],unitVectorN[0]},
                {unitVectorP[1],unitVectorU[1],unitVectorN[1]},
                {unitVectorP[2],unitVectorU[2],unitVectorN[2]}
                                 };
-
-
 
        //animate the flight path by using the fact Paint Component is getting called constantly
        tDelta += 0.01;
