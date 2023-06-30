@@ -10,18 +10,20 @@ import utils.FrameUpdater;
 
 public abstract class Animation {
 
-	public void start() {
-		// open new thread for time measurement
-		ApplicationTime applicationTimeThread = new ApplicationTime();
-		applicationTimeThread.start();
-		FrameUpdater frameUpdater = new FrameUpdater(createFrames(applicationTimeThread));
-		Timer timer = new Timer();
-		// After an initial delay of 100 milliseconds, the timer triggers an event every
-		// 1000 milliseconds which leads to a jumpy animation
-		timer.scheduleAtFixedRate(frameUpdater, 1, 10);
+    public void start() {
+        // open new thread for time measurement
+        ApplicationTime applicationTimeThread = new ApplicationTime();
+        applicationTimeThread.start();
+        FrameUpdater frameUpdater = new FrameUpdater(createFrames(applicationTimeThread));
+        Timer timer = new Timer();
+        // After an initial delay of 100 milliseconds, the timer triggers an event every
+        // 1000 milliseconds which leads to a jumpy animation
+        timer.scheduleAtFixedRate(frameUpdater, 1, 10);
 
-	};
+    }
 
-	protected abstract ArrayList<JFrame> createFrames(ApplicationTime applicationTimeThread);
+    ;
+
+    protected abstract ArrayList<JFrame> createFrames(ApplicationTime applicationTimeThread);
 
 }

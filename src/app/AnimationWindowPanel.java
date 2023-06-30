@@ -1,5 +1,7 @@
 package app;
+
 import utils.ApplicationTime;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -7,10 +9,11 @@ import java.util.ArrayList;
 public class AnimationWindowPanel extends Animation {
     static JButton start = new JButton("Start");
     static JLabel distanceP1P2 = new JLabel();
+
     private static void createControlFrame(ApplicationTime thread) {
 
         // Create a new frame
-        JFrame controlFrame = new JFrame("Mathematik und Simulation");
+        JFrame controlFrame = new JFrame("Geodetic lines on earth and flight simulation");
         controlFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //create a control panel where all the components will be put
@@ -29,7 +32,7 @@ public class AnimationWindowPanel extends Animation {
 
         // Create slider to adjust S1
         JLabel adjustS1 = new JLabel("Adjust S1");
-        JSlider adjustS1Slider = new JSlider(0, 100, (int) GraphicContent.s1ScaleFactor*100);
+        JSlider adjustS1Slider = new JSlider(0, 100, (int) GraphicContent.s1ScaleFactor * 100);
         adjustS1Slider.addChangeListener(e -> {
             GraphicContent.setS1ScaleFactor(adjustS1Slider.getValue());
         });
@@ -80,7 +83,7 @@ public class AnimationWindowPanel extends Animation {
         controlFrame.pack();
 
         //When start is pressed, get the values inside the text fields
-        start.addActionListener(e ->{
+        start.addActionListener(e -> {
             double pos1XDouble = Double.parseDouble(pos1XInput.getText());
             double pos1YDouble = Double.parseDouble(pos1YInput.getText());
             double pos2XDouble = Double.parseDouble(pos2XInput.getText());
@@ -99,7 +102,7 @@ public class AnimationWindowPanel extends Animation {
         ArrayList<JFrame> frames = new ArrayList<>();
 
         // Create main frame (window)
-        JFrame frame = new JFrame("Mathematik und Simulation");
+        JFrame frame = new JFrame("Geodetic lines on earth and flight simulation");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel panel = new GraphicContent(applicationTimeThread);
         frame.add(panel);
