@@ -10,4 +10,4 @@ Die Ansicht des Kugelmodells ist veränderbar, in dem man den Winkel zwischen de
 
 Gruppenmitglieder: Ian Zamorra Bella, Franziska Hartmann 
 
-Link zu Präsentation:
+Link zu Präsentation: https://github.com/HFU-DM-MuS/projekt-03-geodatische-linien-gruppe-nicht-3-1/blob/main/Mathe_pr%C3%A4sentation_projekt_3_Ian_und_Franziska.pdf
